@@ -1,3 +1,4 @@
+# High Temperature and Humidity detection using Alarm
 import random as src
 while True:
     temperature = src.randint(10,100)
