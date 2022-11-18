@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "author": "20L432 - PRADEIP B",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 24.17, "left": 37.5, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -31.86,
+      "left": 228.83,
+      "attrs": { "temperature": "18.3", "humidity": "28" }
+    },
+    { "type": "wokwi-servo", "id": "servo1", "top": 233.1, "left": 240.17, "attrs": {} },
+    { "type": "wokwi-ks2e-m-dc5", "id": "relay2", "top": 347.39, "left": -76.55, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led2",
+      "top": 329.98,
+      "left": 83.99,
+      "attrs": { "color": "magenta" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "dht1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "dht1:SDA", "esp:D4", "green", [ "v0" ] ],
+    [ "esp:GND.1", "servo1:GND", "black", [ "h33.39", "v113.33" ] ],
+    [ "esp:D2", "servo1:PWM", "green", [ "h75.75", "v51.61" ] ],
+    [ "servo1:V+", "esp:VIN", "red", [ "h-217.1", "v-110.54" ] ],
+    [ "relay2:P1", "esp:VIN", "red", [ "v44.28", "h-90.57", "v-237.11" ] ],
+    [ "relay2:COIL2", "esp:GND.2", "black", [ "v0" ] ],
+    [ "relay2:COIL1", "esp:D25", "green", [ "v58.68", "h-147.17", "v-326.38", "h17.28" ] ],
+    [ "led2:A", "relay2:NO1", "green", [ "v36.98", "h-199.63" ] ],
+    [ "led2:C", "esp:GND.2", "black", [ "v94.72", "h-276.21", "v-293.53" ] ]
+  ]
+}
