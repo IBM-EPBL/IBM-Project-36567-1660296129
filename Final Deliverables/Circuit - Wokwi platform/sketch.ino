@@ -24,9 +24,11 @@
 #define DEVICE_ID "24_0A_C4_00_01_10"
 #define TOKEN "projectDONEbyTharunTeam12345"
 
+void callback(char* subscribetopic, byte* payload, unsigned int payloadLength); 
+
 char server[] = ORG".messaging.internetofthings.ibmcloud.com";
 char publishTopic[] = "iot-2/evt/Data/fmt/json";
-char topic[] = "iot-2/cmd/test/fmt/String";
+char subscribeTopic[] = "iot-2/cmd/command/fmt/String";
 char AUTH[] = "use-token-auth";
 char token[] = TOKEN;
 char CLIENTID[] = "d:"ORG":"DEVICE_TYPE":"DEVICE_ID;
@@ -38,6 +40,7 @@ uint32_t delayMS;
 // Temperature and humidity variables
 float temperature = 0;
 float humidity = 0;
+String data = "";
 
 // SSID and Password for WiFi connection
 char SSID[] = "Wokwi-GUEST";
@@ -48,7 +51,7 @@ Servo servo;
 int deg = 0;
 
 WiFiClient wifiClient;
-PubSubClient client(server, 1883, wifiClient);
+PubSubClient client(server, 1883, callback, wifiClient);
 
 // Connecting to Cloud through MQTT Protocol
 void mqttConnect()
@@ -63,7 +66,7 @@ void mqttConnect()
       delay(500);
     }
     Serial.println();
-    if (client.subscribe(topic))
+    if (client.subscribe(subscribeTopic))
     {
       Serial.println("Subscription Success!");
     }
@@ -72,6 +75,42 @@ void mqttConnect()
       Serial.println("Subscription Failed!");
     }
   }
+}
+
+void callback(char* subscribetopic, byte* payload, unsigned int payloadLength) 
+{
+  
+  Serial.print("callback invoked for topic: ");
+  Serial.println(subscribetopic);
+  for (int i = 0; i < payloadLength; i++) {
+    //Serial.print((char)payload[i]);
+    data += (char)payload[i];
+  }
+  
+  Serial.println("data: "+ data); 
+  if(data=="Motor OFF")
+  {
+    digitalWrite(violetPin, LOW);
+    Serial.println("Now tap is closed and irrigation stopped!");
+    Serial.println("Also MOTOR IS OFF (Shown by non-glowing voilet led)");
+    for (; deg >= 0; deg -= 1) 
+    {
+      servo.write(deg);
+      delay(15);
+    }
+  }
+  else if (data=="Motor ON")
+  {
+    digitalWrite(violetPin, HIGH);
+    Serial.println("Now tap is open and irrigation occurs!");
+    Serial.println("Also MOTOR IS ON (Shown by glowing voilet led)");
+    for (; deg <= 90; deg += 1) 
+    {
+      servo.write(deg);
+      delay(15);
+    }
+  }
+  data = "";  
 }
 
 // Setup function - run only once
@@ -177,28 +216,28 @@ void loop() {
   Serial.println("------------------------------------");
 
   // Controlling tap and motor based on certain conditions
-  if ( ((temperature < 27)||(temperature == 0)) && ((humidity > 30)||(humidity == 0)) )
-  { 
-    digitalWrite(violetPin, LOW);
-    Serial.println("Now tap is closed and irrigation stopped!");
-    Serial.println("Also MOTOR IS OFF (Shown by non-glowing voilet led)");
-    for (; deg >= 0; deg -= 1) 
-    {
-      servo.write(deg);
-      delay(15);
-    }
-  }
-  else
-  {
-    digitalWrite(violetPin, HIGH);
-    Serial.println("Now tap is open and irrigation occurs!");
-    Serial.println("Also MOTOR IS ON (Shown by glowing voilet led)");
-    for (; deg <= 90; deg += 1) 
-    {
-      servo.write(deg);
-      delay(15);
-    }
-  }
+  // if ( ((temperature < 27)||(temperature == 0)) && ((humidity > 30)||(humidity == 0)) )
+  // { 
+  //   digitalWrite(violetPin, LOW);
+  //   Serial.println("Now tap is closed and irrigation stopped!");
+  //   Serial.println("Also MOTOR IS OFF (Shown by non-glowing voilet led)");
+  //   for (; deg >= 0; deg -= 1) 
+  //   {
+  //     servo.write(deg);
+  //     delay(15);
+  //   }
+  // }
+  // else
+  // {
+    // digitalWrite(violetPin, HIGH);
+    // Serial.println("Now tap is open and irrigation occurs!");
+    // Serial.println("Also MOTOR IS ON (Shown by glowing voilet led)");
+    // for (; deg <= 90; deg += 1) 
+    // {
+    //   servo.write(deg);
+    //   delay(15);
+    // }
+  // }
   Serial.println("------------------------------------");
 
   if (!client.loop())
